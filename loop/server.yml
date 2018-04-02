@@ -13,7 +13,7 @@
         nics:
          - net-id: "{{ subnet.network_id }}"
          - net-name: nat
-        key_name: mykey
+        key_name: ansible_key
         region_name: ru-2
      register: created_servers
 

@@ -2,119 +2,95 @@
 - hosts: localhost
   vars_files:
     - vars/infra.yml
-  #vars:
-  #  compute_cores: 0
-  #  compute_ram: 0
 
   tasks:
-   #- set_fact:
-   #    compute_cores: "{{ item.value.compute_cores|int + compute_cores|int }}"
-   #    compute_ram: "{{ item.value.compute_ram|int + compute_ram|int }}"
-   #  with_dict:
-   #     - "{{ servers }}"
-
-### 1. Создание проекта
    - name: Create project
      selvpc_projects:
-     #os_project:
-         project_name: "{{ project_name }}"
+       project_name: "{{ project_name }}"
      register: project_out
 
-### 2. Создание квот 
    - name: Set quotas on created project
      selvpc_quotas:
-     #os_quota:
-         project_id: "{{ project_out.project.id }}"
-         quotas:
-             compute_cores:
-             - region: ru-2
-               zone: ru-2a
-               value: "{{ compute_cores }}"
-             compute_ram:
-             - region: ru-2
-               zone: ru-2a
-               value: "{{ compute_ram }}"
-             volume_gigabytes_basic:
-             - region: ru-2
-               zone: ru-2a
-               value: "{{ volume_gigabytes_basic }}"
-             volume_gigabytes_universal:
-             - region: ru-2
-               zone: ru-2a
-               value: "{{ volume_gigabytes_universal }}"
-             volume_gigabytes_fast:
-             - region: ru-2
-               zone: ru-2a
-               value: "{{ volume_gigabytes_fast }}"
+       project_id: "{{ project_out.project.id }}"
+       quotas:
+         compute_cores:
+         - region: ru-2
+           zone: ru-2a
+           value: "{{ compute_cores }}"
+         compute_ram:
+         - region: ru-2
+           zone: ru-2a
+           value: "{{ compute_ram }}"
+         volume_gigabytes_basic:
+         - region: ru-2
+           zone: ru-2a
+           value: "{{ volume_gigabytes_basic }}"
+         volume_gigabytes_universal:
+         - region: ru-2
+           zone: ru-2a
+           value: "{{ volume_gigabytes_universal }}"
+         volume_gigabytes_fast:
+         - region: ru-2
+           zone: ru-2a
+           value: "{{ volume_gigabytes_fast }}"
 
      register: quotas_out
 
-### 3. Создание пользователя
    - name: Create user
      selvpc_users:
-     #os_user:
-         username: "{{ username }}"
-         password: "{{ password }}"
+       username: "{{ username }}"
+       password: "{{ password }}"
      register: user_out
 
-### 4. Добавление пользователя в проект
    - name: Add created user to project
      selvpc_roles:
-     #os_user_role:
-         project_id: "{{ project_out.project.id }}"
-         user_id: "{{ user_out.user.id }}"
+       project_id: "{{ project_out.project.id }}"
+       user_id: "{{ user_out.user.id }}"
 
-### 5. Создание сети 
    - name: Create public net
      selvpc_subnets:
-     #os_subnet:
-         project_id: "{{ project_out.project.id }}"
-         subnets:
-          - region: ru-2
-            type: ipv4
-            quantity: 1
-            prefix_length: 29
-     register: public_net
-
-### 6. Получение информации о сетях
-   - name: Get info about network
-     selvpc_subnets:
-     #os_subnet:
-          subnet_id: "{{ public_net|json_query('subnets[0].id') }}"
+       project_id: "{{ project_out.project.id }}"
+       subnets:
+        - region: ru-2
+          type: ipv4
+          quantity: 1
+          prefix_length: 29
      register: network_out
 
-#### 6.1. Запись информации о сети в файл для использования при создании сервера
-   - local_action: copy content="{{ network_out }}" dest="/etc/ansible/vpc/vars/subnet.yml"
+   - name: Get info about specific subnet
+     selvpc_subnets:
+       subnet_id: "{{ network_out|json_query('subnets[0].id') }}"
+     register: network
 
-### 7. Добавление SSH ключей
+   - local_action: copy content="{{ network }}" dest="vars/subnet.yml"
+
    - name: Create key
      os_keypair:
-        state: present
-        auth:
-          auth_url: https://api.selvpc.ru/identity/v3
-          username: "{{ username }}"
-          password: "{{ password }}"
-          project_name: "{{ project_name }}"
-        name: ansible_key
-        region_name: ru-2
-        public_key_file: "{{ '~' | expanduser }}/.ssh/id_rsa.pub"
+       state: present
+       auth:
+         auth_url: https://api.selvpc.ru/identity/v3
+         username: "{{ username }}"
+         password: "{{ password }}"
+         project_name: "{{ project_name }}"
+       name: ansible_key
+       region_name: ru-2
+       public_key_file: "{{ '~' | expanduser }}/.ssh/id_rsa.pub"
      register: key
 
-### 9. Создание конфигурации
    - name: Create flavor
      os_nova_flavor:
-        state: present
-        auth:
-          auth_url: https://api.selvpc.ru/identity/v3
-          username: "{{ username }}"
-          password: "{{ password }}"
-          project_name: "{{ project_name }}"
-        name: "tmp3_{{ item }}"
-        ram: "{{ servers[item].compute_ram }}"
-        vcpus: "{{ servers[item].compute_cores }}"
-        disk: 0
-        region_name: ru-2
-        is_public: True
+       state: present
+       auth:
+         auth_url: https://api.selvpc.ru/identity/v3
+         username: "{{ username }}"
+         password: "{{ password }}"
+         project_name: "{{ project_name }}"
+       name: "tmp3_{{ item }}"
+       ram: "{{ servers[item].compute_ram }}"
+       vcpus: "{{ servers[item].compute_cores }}"
+       disk: 0
+       region_name: ru-2
+       is_public: True
      with_items: "{{ servers }}"
      register: flavor
 

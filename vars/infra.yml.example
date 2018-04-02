@@ -1,26 +1,41 @@
-username: Имя пользователя 
+# Имя нового пользователя
+username: Имя пользователя
+
+# Паролья для нового пользователя
 password: Пароль
+
 project_name: Название проекта
 
-compute_cores: 3 (кол-во ядер на проект)
-compute_ram: 1536 (кол-во памяти на проект)
-volume_gigabytes_basic: 10 (кол-во Гигабайт для базового диска)
-volume_gigabytes_universal: 10 (кол-во универсального для базового диска)
-volume_gigabytes_fast: 0 (кол-во Гигабайт для быстрого диска)
+# кол-во ядер на проект
+compute_cores: 3
+
+# кол-во памяти на проект
+compute_ram: 1536
+
+# кол-во Гигабайт для базового диска
+volume_gigabytes_basic: 10
+
+# кол-во универсального для базового диска
+volume_gigabytes_universal: 10
+
+# кол-во Гигабайт для быстрого диска
+volume_gigabytes_fast: 0
 
 networks:
   public:
     region: ru-2 (Регион сети)
     type: ipv4
-    quantity: 1 
+    quantity: 1
     prefix_length: 29
 
 servers:
   mail:
-   compute_cores: 1 (кол-во ядер для сервера. Будет учитываться для создания flavor)
-   compute_ram: 1024 (кол-во памяти для сервера. Так же для flavor)
+   # кол-во ядер для сервера. Будет учитываться для создания flavor
+   compute_cores: 1
+   # кол-во памяти для сервера. Так же для flavor
+   compute_ram: 1024
    volumes:
-     - volume: 
+     - volume:
        name: disk-for-mail
        size: 5
        type: basic

@@ -1,0 +1,8 @@
+/*
+!infra-create.yml
+!server-create.yml
+!/loop
+!/vars
+/vars/*
+!/vars/infra.yml.example
+!.gitignore
