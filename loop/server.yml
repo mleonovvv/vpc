@@ -1,0 +1,31 @@
+   - name: Create servers
+     os_server:
+        state: present
+        auth:
+          auth_url: https://api.selvpc.ru/identity/v3
+          username: "{{ username }}"
+          password: "{{ password }}"
+          project_name: "{{ project_name }}"
+        name: "{{ item }}"
+        flavor: "tmp3_{{ item }}"
+        boot_volume: "{{ volume_id[0] }}"
+        volumes: "{{ volume_id[1:99] }}"
+        nics:
+         - net-id: "{{ subnet.network_id }}"
+         - net-name: nat
+        key_name: mykey
+        region_name: ru-2
+     register: created_servers
+
+   - name: Delete flavor
+     os_nova_flavor:
+         state: absent
+         auth:
+           auth_url: https://api.selvpc.ru/identity/v3
+           username: "{{ username }}"
+           password: "{{ password }}"
+           project_name: "{{ project_name }}"
+         name: "tmp2_{{ item }}"
+         region_name: ru-2
+     register: out
+

@@ -1,0 +1,97 @@
+---
+- hosts: localhost
+  vars_files:
+    - vars/infra.yml
+    - vars/subnet.yml
+
+  tasks:
+
+
+   - include_tasks: loop/volume.yml
+     with_dict: "{{ servers }}"
+     loop_control:
+       loop_var: server
+
+#### 1. Создание Volume
+#   - name: Create volumes
+#     os_volume:
+#        state: present
+#        auth:
+#          auth_url: https://api.selvpc.ru/identity/v3
+#          username: "{{ username }}"
+#          password: "{{ password }}"
+#          project_name: "{{ project_name }}"
+#        display_name: "{{ item.value.volume_name }}"
+#        image: "{{ item.value.image }}"
+#        size: "{{ item.value.volume_size }}"
+#        volume_type: "{{ item.value.volume_type }}.ru-2a"
+#        region_name: ru-2
+#     with_dict: "{{ servers }}"
+#     register: volume
+#
+#   - local_action: copy content="{{ volume }}" dest="/etc/ansible/vpc/vars/volume.yml"
+#
+##### 9. Создание конфигурации
+##   - name: Create flavor
+##     os_nova_flavor:
+##        state: present
+##        auth:
+##          auth_url: https://api.selvpc.ru/identity/v3
+##          username: "{{ username }}"
+##          password: "{{ password }}"
+##          project_name: "{{ project_name }}"
+##        name: selectel_test_flavor3
+##        ram: 512
+##        vcpus: 1
+##        disk: 0
+##        region_name: ru-1
+##        is_public: False
+##     register: flavor
+#
+#### Include volume.yml    
+#   - include_vars:
+#        file: vars/volume.yml
+#        name: vol
+#
+#### 10. Создание сервера
+#   - name: Create servers
+#     os_server:
+#        state: present
+#        auth:
+#          auth_url: https://api.selvpc.ru/identity/v3
+#          username: "{{ username }}"
+#          password: "{{ password }}"
+#          project_name: "{{ project_name }}"
+#        name: "{{ item.1 }}"
+#        #name: mail
+#        flavor: m1.tiny
+#        boot_volume: "{{ item.0 }}"
+#        #boot_volume: "fc6f9ffc-1e57-4bbe-b979-e0ca1283d0c0"
+#        #nics: "net-id={{ subnet.network_id }}"
+#        nics:
+#         - net-id: "{{ subnet.network_id }}"
+#         - net-name: nat
+#        #nics: "net-id=e7ddbaad-d400-4a69-ac41-04e80aaf4d5a"
+#        key_name: mykey
+#        region_name: ru-2
+#     with_together:
+#        - "{{ vol|json_query('results[*].id') }}"
+#        - "{{ servers }}" 
+#     register: created_servers
+#
+#   - local_action: copy content="{{ created_servers }}" dest="/etc/ansible/vpc/vars/created-servers.yml"
+#
+#   - name: Add hosts to inventory
+#     add_host:
+#        name: "{{ item.name }}"
+#        ansible_host: "{{ item.accessIPv4 }}"
+#        ansible_ssh_user: root
+#        groups: just_created
+#     #with_items: "{{ created_servers|json_query('results[*].openstack.accessIPv4') }}"
+#     with_items: "{{ created_servers|json_query('results[*].openstack') }}"
+#
+#   - pause:
+#        seconds: 40
+#
+##- import_playbook: mail-install.yml
+##- import_playbook: other-install.yml

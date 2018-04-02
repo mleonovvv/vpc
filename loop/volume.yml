@@ -1,0 +1,27 @@
+### 1. Создание Volume
+#   - include_vars:
+#       file: vars/volume.yml
+#       name: volume
+
+   - name: Create volumes
+     os_volume:
+        state: present
+        auth:
+          auth_url: https://api.selvpc.ru/identity/v3
+          username: "{{ username }}"
+          password: "{{ password }}"
+          project_name: "{{ project_name }}"
+        display_name: "{{ item.name }}"
+        image: "{{ item.image|default(0) }}"
+        size: "{{ item.size }}"
+        volume_type: "{{ item.type }}.ru-2a"
+        region_name: ru-2
+     with_items: "{{ server.value.volumes }}"
+     register: volume
+
+   - set_fact:
+        volume_id: "{{ volume|json_query('results[*].id') }}"
+
+   - include_tasks: loop/server.yml
+     with_items: 
+        - "{{ server.key }}"

@@ -1,0 +1,45 @@
+username: Имя пользователя 
+password: Пароль
+project_name: Название проекта
+
+compute_cores: 3 (кол-во ядер на проект)
+compute_ram: 1536 (кол-во памяти на проект)
+volume_gigabytes_basic: 10 (кол-во Гигабайт для базового диска)
+volume_gigabytes_universal: 10 (кол-во универсального для базового диска)
+volume_gigabytes_fast: 0 (кол-во Гигабайт для быстрого диска)
+
+networks:
+  public:
+    region: ru-2 (Регион сети)
+    type: ipv4
+    quantity: 1 
+    prefix_length: 29
+
+servers:
+  mail:
+   compute_cores: 1 (кол-во ядер для сервера. Будет учитываться для создания flavor)
+   compute_ram: 1024 (кол-во памяти для сервера. Так же для flavor)
+   volumes:
+     - volume: 
+       name: disk-for-mail
+       size: 5
+       type: basic
+       image: Ubuntu 16.04 LTS 64-bit
+     - volume:
+       name: disk-for-mail2
+       size: 5
+       type: universal
+  other:
+   compute_cores: 1
+   compute_ram: 512
+   volumes:
+     - volume:
+       name: disk-for-other
+       size: 5
+       type: basic
+       image: Ubuntu 16.04 LTS 64-bit
+     - volume:
+       name: disk-for-other2
+       size: 5
+       type: universal
+       image: Ubuntu 16.04 LTS 64-bit
